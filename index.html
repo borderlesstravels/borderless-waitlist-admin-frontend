@@ -111,10 +111,8 @@
         <tr>
           <th>S/N</th>
           <th>First Name</th>
-          <th>Last Name</th>
-          <th>Email</th>
-          <th>Phone</th>
-          <!-- <th>Country</th> -->
+          <th>City</th>
+          <th>Country</th>
           <th>Date Joined</th>
         </tr>
       </thead>
@@ -132,9 +130,7 @@
 </div>
 
 <script>
-  let allData = [];
-  let currentPage = 1;
-  const rowsPerPage = 5;
+ 
 
   function fetchData() {
     const xhr = new XMLHttpRequest();
@@ -223,9 +219,9 @@
       tr.innerHTML = `
         <td>${start + i + 1}</td>
         <td>${item.first_name}</td>
-        <td>${item.last_name}</td>
-        <td>${item.email}</td>
-        <td>${item.phone}</td>
+        <td>${item.city}</td>
+        <td>${item.country}</td>
+      
         <td>${formatDate(item.created_at)}</td>
       `;
       tbody.appendChild(tr);
