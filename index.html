@@ -94,7 +94,7 @@
 
 <div class="container">
   <div class="title">
-    <h2>Waitlist Signups – Borderless Travel Campaign</h2>
+    <h4>Waitlist Signups – Borderless Travel Campaign</h4>
     <p>Track new users joining the movement to explore the world effortlessly.</p>
   </div>
 
@@ -130,7 +130,9 @@
 </div>
 
 <script>
- 
+  let allData = [];  // Declare allData
+  let currentPage = 1;  // Declare currentPage with default value
+  let rowsPerPage = 5;  // Declare rowsPerPage with default value
 
   function fetchData() {
     const xhr = new XMLHttpRequest();
@@ -190,9 +192,11 @@
     const phone = (item.phone || '').toLowerCase();
     const country = (item.country || '').toLowerCase();
 
+    // Combine first and last name for full name search
+    const fullName = (first + ' ' + last).toLowerCase();
+
     const matchesSearch = (
-      first.includes(search) ||
-      last.includes(search) ||
+      fullName.includes(search) ||  // Now it checks the full name
       email.includes(search) ||
       phone.includes(search) ||
       country.includes(search)
@@ -208,7 +212,7 @@
   const tbody = document.getElementById('signupTableBody');
   tbody.innerHTML = '';
 
-  if (paginated.length === 0) {
+  if (filtered.length === 0 || paginated.length === 0) {
     tbody.innerHTML = '<tr><td colspan="7">No records found.</td></tr>';
   } else {
     paginated.forEach((item, i) => {
@@ -216,56 +220,77 @@
       if (item.country === selectedCountry && selectedCountry !== '') {
         tr.classList.add('highlight');
       }
-      tr.innerHTML = `
+
+      // Create table row with conditional checks for empty fields
+      let rowHTML = `
         <td>${start + i + 1}</td>
         <td>${item.first_name}</td>
-        <td>${item.city}</td>
-        <td>${item.country}</td>
-      
-        <td>${formatDate(item.created_at)}</td>
       `;
+
+      // Only show city if it's not empty
+      if (item.city) {
+        rowHTML += `<td>${item.city}</td>`;
+      }else{
+        rowHTML += `<td>No data found</td>`;
+      }
+
+      // Only show country if it's not empty
+      if (item.country) {
+        rowHTML += `<td>${item.country}</td>`;
+      }else{
+        rowHTML += `<td>No data found</td>`;
+      }
+
+      // Always show the date if present
+      rowHTML += `<td>${formatDate(item.created_at)}</td>`;
+
+      tr.innerHTML = rowHTML;
       tbody.appendChild(tr);
     });
   }
 }
 
-function renderPagination() {
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const selectedCountry = document.getElementById('countryFilter').value;
 
-  const filtered = allData.filter(item => {
-    const first = (item.first_name || '').toLowerCase();
-    const last = (item.last_name || '').toLowerCase();
-    const email = (item.email || '').toLowerCase();
-    const phone = (item.phone || '').toLowerCase();
-    const country = (item.country || '').toLowerCase();
+  function renderPagination() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const selectedCountry = document.getElementById('countryFilter').value;
 
-    const matchesSearch = (
-      first.includes(search) ||
-      last.includes(search) ||
-      email.includes(search) ||
-      phone.includes(search) ||
-      country.includes(search)
-    );
+    const filtered = allData.filter(item => {
+      const first = (item.first_name || '').toLowerCase();
+      const last = (item.last_name || '').toLowerCase();
+      const email = (item.email || '').toLowerCase();
+      const phone = (item.phone || '').toLowerCase();
+      const country = (item.country || '').toLowerCase();
 
-    const matchesCountry = selectedCountry === '' || item.country === selectedCountry;
+      const matchesSearch = (
+        first.includes(search) ||
+        last.includes(search) ||
+        email.includes(search) ||
+        phone.includes(search) ||
+        country.includes(search)
+      );
 
-    return matchesSearch && matchesCountry;
-  });
+      const matchesCountry = selectedCountry === '' || item.country === selectedCountry;
 
-  const totalPages = Math.ceil(filtered.length / rowsPerPage);
-  const paginationDiv = document.getElementById('pagination');
-  paginationDiv.innerHTML = '';
+      return matchesSearch && matchesCountry;
+    });
 
-  for (let i = 1; i <= totalPages; i++) {
-    const btn = document.createElement('button');
-    btn.textContent = i;
-    if (i === currentPage) btn.classList.add('active');
-    btn.addEventListener('click', () => goToPage(i));
-    paginationDiv.appendChild(btn);
+    const totalPages = Math.ceil(filtered.length / rowsPerPage);
+    const paginationDiv = document.getElementById('pagination');
+    paginationDiv.innerHTML = '';
+
+    if (totalPages === 0) {
+      paginationDiv.innerHTML = '<p>No pages available.</p>';
+    } else {
+      for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        if (i === currentPage) btn.classList.add('active');
+        btn.addEventListener('click', () => goToPage(i));
+        paginationDiv.appendChild(btn);
+      }
+    }
   }
-}
-
 
   function goToPage(page) {
     currentPage = page;
@@ -288,6 +313,8 @@ function renderPagination() {
     });
   });
 </script>
+
+
 
 </body>
 </html>
